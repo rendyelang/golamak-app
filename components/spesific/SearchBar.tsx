@@ -10,17 +10,15 @@ const SearchBar = ({ value, onChangeText }) => {
   };
 
   return (
-    <BlurView className="flex-row justify-between items-center px-6 py-2 border border-tertier rounded-3xl overflow-hidden" intensity={60} tint="light">
+    <BlurView intensity={60} tint="light" className="flex-row justify-between items-center px-6 py-2 border border-tertier rounded-3xl overflow-hidden">
       <TextInput
-        className="text-white font-poppins text-sm"
+        className="text-white font-poppins text-sm flex-1"
         placeholderTextColor="#ffffff"
         placeholder="Search menu..."
         value={value}
         onChangeText={onChangeText}
         style={{
           paddingVertical: 0,
-          paddingTop: 0,
-          paddingBottom: 0,
           includeFontPadding: false,
           textAlignVertical: "center",
           lineHeight: 20,

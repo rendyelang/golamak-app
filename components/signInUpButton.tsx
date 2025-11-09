@@ -1,10 +1,11 @@
 import { BlurView } from "expo-blur";
 import React from "react";
-import { Pressable, Text, View, type PressableProps, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import { Text, TouchableOpacity, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import { TouchableProps } from "react-native-svg";
 
 type ButtonVariant = "primary" | "secondary";
 
-interface ButtonProps extends Omit<PressableProps, "style"> {
+interface ButtonProps extends Omit<TouchableProps, "style"> {
   title: string;
   variant?: ButtonVariant;
   onPress?: () => void;
@@ -35,21 +36,21 @@ export function Button({ title, variant = "primary", onPress, style, textStyle, 
 
   if (variant === "secondary") {
     return (
-      <Pressable onPress={onPress} className={`${baseClasses} ${variantClasses[variant]}`} style={[shadowStyle, style]} {...props}>
+      <TouchableOpacity onPress={onPress} className={`${baseClasses} ${variantClasses[variant]}`} style={[shadowStyle, style]} {...props}>
         <BlurView intensity={70} tint="light" className="absolute inset-0" />
         <View className="absolute inset-0 bg-black/20" />
         <Text className={`${textClasses[variant]} z-10`} style={textStyle}>
           {title}
         </Text>
-      </Pressable>
+      </TouchableOpacity>
     );
   }
 
   return (
-    <Pressable onPress={onPress} className={`${baseClasses} ${variantClasses[variant]}`} style={[shadowStyle, style]} {...props}>
+    <TouchableOpacity onPress={onPress} className={`${baseClasses} ${variantClasses[variant]}`} style={[shadowStyle, style]} {...props}>
       <Text className={textClasses[variant]} style={textStyle}>
         {title}
       </Text>
-    </Pressable>
+    </TouchableOpacity>
   );
 }

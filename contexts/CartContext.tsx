@@ -8,6 +8,7 @@ export interface CartItem {
   quantity: number;
   selected?: boolean;
   addon?: string;
+  addons?: { id: number; name: string; price: number }[];
 }
 
 export interface CartContextType {
@@ -28,11 +29,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const addToCart = (item: CartItem) => {
     setCart((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
+      const existing = prev.find((i) => i.id === item.id && JSON.stringify(i.addons?.map((a) => a.id).sort()) === JSON.stringify(item.addons?.map((a) => a.id).sort()));
+
       if (existing) {
-        return prev.map((i) => (i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i));
+        return prev.map((i) => (i === existing ? { ...i, quantity: i.quantity + item.quantity } : i));
       } else {
-        return [...prev, { ...item, quantity: 1, selected: false, addon: "No" }];
+        return [...prev, { ...item, selected: false }];
       }
     });
   };

@@ -8,8 +8,8 @@ interface Props {
 }
 
 const CartButton: React.FC<Props> = ({ onPress }) => {
-  const { cart } = useCart(); // ⬅️ Ganti dari cartItems → cart
-  const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0); // ⬅️ Ganti dari qty → quantity
+  const { cart } = useCart();
+  const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <TouchableOpacity onPress={onPress} className="rounded-full border border-tertier p-3 bg-white/30 relative">

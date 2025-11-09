@@ -33,7 +33,7 @@ const index = () => {
   });
 
   const bottomSheetRef = useRef(null);
-  const snapPoints = useMemo(() => ["57%", "90%"], []); // bisa ditarik dari 40% ke full screen
+  const snapPoints = useMemo(() => ["57%", "90%"], []); // bisa ditarik dari % 57ke full screen
 
   return (
     <GestureHandlerRootView className="pb-96">

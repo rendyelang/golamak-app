@@ -25,76 +25,71 @@ export default function CartScreen() {
         {item.selected && <Feather name="check" size={24} color="white" />}
       </TouchableOpacity>
 
-      {/* Gambar */}
-      <Image
-        source={item.image}
-        style={{
-          width: 90,
-          height: 110,
-          borderRadius: 8,
-          marginRight: 14,
-        }}
-      />
+      <View>
+        {/* Gambar */}
+        <Image
+          source={item.image}
+          style={{
+            width: 90,
+            height: 110,
+            borderRadius: 8,
+            marginRight: 14,
+          }}
+        />
+        <Text className="font-poppins-bold text-lg mt-4">Rp. {(item.price * item.quantity).toLocaleString("id-ID")}</Text>
+      </View>
 
       {/* Info produk */}
       <View style={{ flex: 1, justifyContent: "space-between" }}>
         <View>
           <Text className="font-poppins-medium text-xl mb-2">{item.name}</Text>
 
-          <View className="mt-[6px] flex-row justify-between items-center mb-7">
+          <View className="mt-[6px] flex-row justify-between items-center mb-4">
             <View>
               <Text className="font-poppins-light">Addon</Text>
-              {/* <Picker
-                selectedValue={item.addon}
-                style={{
-                    width: 100,
-                    height: 35,
-                    backgroundColor: "#f8f8f8",
-                    borderRadius: 6,
-                }}
-                onValueChange={(value) => console.log("Addon changed:", value)}
-                >
-                <Picker.Item label="No" value="No" />
-                <Picker.Item label="Tofu" value="Tofu" />
-                <Picker.Item label="Extra Spicy" value="Extra Spicy" />
-                </Picker> */}
-            </View>
-
-            {/* Counter */}
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <View className="flex-row items-center border border-tertier rounded-xl p-1">
-                <TouchableOpacity
-                  onPress={() => updateQuantity(item.id, item.quantity - 1)}
-                  className={`w-9 h-9 rounded-full items-center justify-center ${item.quantity === 1 ? "bg-[#D9D9D9]" : "border border-secondary"}`}
-                  disabled={item.quantity === 1}
-                >
-                  <Text style={{ fontSize: 18 }}>−</Text>
-                </TouchableOpacity>
-
-                <Text
-                  style={{
-                    fontSize: 16,
-                    marginHorizontal: 8,
-                    fontWeight: "500",
-                  }}
-                >
-                  {item.quantity}
-                </Text>
-
-                <TouchableOpacity onPress={() => updateQuantity(item.id, item.quantity + 1)} className="w-9 h-9 rounded-full items-center justify-center bg-secondary">
-                  <Text style={{ fontSize: 18, color: "white" }}>＋</Text>
-                </TouchableOpacity>
-              </View>
+              {item.addons && item.addons.length > 0 && (
+                <View className="mb-2">
+                  {item.addons.map((addon) => (
+                    <Text key={addon.id} className="font-poppins-light text-sm text-gray-600">
+                      + {addon.name} (Rp. {addon.price.toLocaleString("id-ID")})
+                    </Text>
+                  ))}
+                </View>
+              )}
             </View>
           </View>
+          {/* Counter */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <View className="flex-row items-center border border-tertier rounded-xl p-1">
+              <TouchableOpacity
+                onPress={() => updateQuantity(item.id, item.quantity - 1)}
+                className={`w-9 h-9 rounded-full items-center justify-center ${item.quantity === 1 ? "bg-[#D9D9D9]" : "border border-secondary"}`}
+                disabled={item.quantity === 1}
+              >
+                <Text style={{ fontSize: 18 }}>−</Text>
+              </TouchableOpacity>
 
-          <Text className="font-poppins-bold text-lg">Rp. {(item.price * item.quantity).toLocaleString("id-ID")}</Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  marginHorizontal: 8,
+                  fontWeight: "500",
+                }}
+              >
+                {item.quantity}
+              </Text>
+
+              <TouchableOpacity onPress={() => updateQuantity(item.id, item.quantity + 1)} className="w-9 h-9 rounded-full items-center justify-center bg-secondary">
+                <Text style={{ fontSize: 18, color: "white" }}>＋</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </View>
     </View>

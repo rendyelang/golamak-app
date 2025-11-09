@@ -13,7 +13,7 @@ const profile = () => {
       <ProfileCard />
       <Text className="font-poppins-medium text-xl mt-10 mb-5">General</Text>
       <View>
-        <ProfileMenuItem icon="favorite" label="Favorites" />
+        <ProfileMenuItem onPress={() => router.push("/liked")} icon="favorite" label="Favorites" />
         <ProfileMenuItem icon="settings" label="Setting" />
         <ProfileMenuItem onPress={() => router.push("/helpCenter")} icon="help-outline" label="Help Center" />
         <ProfileMenuItem icon="logout" label="Log Out" />

@@ -9,6 +9,7 @@ import "react-native-reanimated";
 import "../assets/css/globals.css";
 
 import { CartProvider } from "@/contexts/CartContext";
+import { LikedProvider } from "@/contexts/LikedContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from "@expo-google-fonts/poppins";
 
@@ -43,15 +44,17 @@ export default function RootLayout() {
 
   return (
     <CartProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(auth)/splash" />
-          <Stack.Screen name="(auth)/welcome" />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <LikedProvider>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(auth)/splash" />
+            <Stack.Screen name="(auth)/welcome" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </LikedProvider>
     </CartProvider>
   );
 }
