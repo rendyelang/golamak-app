@@ -4,22 +4,26 @@ export interface CartItem {
   id: number;
   name: string;
   price: number;
-  image: string;
+  image: any;
   quantity: number;
   selected?: boolean;
-  addon?: string;
   addons?: { id: number; name: string; price: number }[];
+  uniqueKey: string; // unik untuk membedakan item dengan addon berbeda
+  basePrice: number;
+  addonPrice: number;
+  totalPrice: number;
 }
 
 export interface CartContextType {
   cart: CartItem[];
-  addToCart: (item: CartItem) => void;
-  updateQuantity: (id: number, newQty: number) => void;
-  toggleSelectItem: (id: number) => void;
+  addToCart: (item: Omit<CartItem, "uniqueKey" | "totalPrice" | "addonPrice" | "basePrice">) => void;
+  updateQuantity: (uniqueKey: string, newQty: number) => void;
+  toggleSelectItem: (uniqueKey: string) => void;
   selectAll: () => void;
   isAllSelected: boolean;
   removeSelectedItems: () => void;
   getTotalPrice: () => number;
+  checkoutSelectedItems: () => CartItem[]; // ✅ fungsi baru
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,25 +31,31 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  const addToCart = (item: CartItem) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.id === item.id && JSON.stringify(i.addons?.map((a) => a.id).sort()) === JSON.stringify(item.addons?.map((a) => a.id).sort()));
+  const addToCart = (item: Omit<CartItem, "uniqueKey" | "totalPrice" | "addonPrice" | "basePrice">) => {
+    const addonPrice = item.addons?.reduce((sum, addon) => sum + addon.price, 0) || 0;
+    const basePrice = item.price;
+    const totalPrice = basePrice + addonPrice;
 
-      if (existing) {
-        return prev.map((i) => (i === existing ? { ...i, quantity: i.quantity + item.quantity } : i));
-      } else {
-        return [...prev, { ...item, selected: false }];
-      }
-    });
+    const uniqueKey = `${item.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    const newItem: CartItem = {
+      ...item,
+      uniqueKey,
+      basePrice,
+      addonPrice,
+      totalPrice,
+    };
+
+    setCart((prevCart) => [...prevCart, newItem]);
   };
 
-  const updateQuantity = (id: number, newQty: number) => {
+  const updateQuantity = (uniqueKey: string, newQty: number) => {
     if (newQty < 1) return;
-    setCart((prev) => prev.map((item) => (item.id === id ? { ...item, quantity: newQty } : item)));
+    setCart((prev) => prev.map((item) => (item.uniqueKey === uniqueKey ? { ...item, quantity: newQty } : item)));
   };
 
-  const toggleSelectItem = (id: number) => {
-    setCart((prev) => prev.map((item) => (item.id === id ? { ...item, selected: !item.selected } : item)));
+  const toggleSelectItem = (uniqueKey: string) => {
+    setCart((prev) => prev.map((item) => (item.uniqueKey === uniqueKey ? { ...item, selected: !item.selected } : item)));
   };
 
   const selectAll = () => {
@@ -60,7 +70,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getTotalPrice = () => {
-    return cart.filter((item) => item.selected).reduce((total, item) => total + item.price * item.quantity, 0);
+    return cart.filter((item) => item.selected).reduce((total, item) => total + item.totalPrice * item.quantity, 0);
+  };
+
+  // ✅ fungsi baru: checkoutSelectedItems
+  const checkoutSelectedItems = () => {
+    const selectedItems = cart.filter((item) => item.selected);
+    setCart((prev) => prev.filter((item) => !item.selected));
+    return selectedItems;
   };
 
   return (
@@ -74,6 +91,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         isAllSelected,
         removeSelectedItems,
         getTotalPrice,
+        checkoutSelectedItems, // ✅ include ke context
       }}
     >
       {children}

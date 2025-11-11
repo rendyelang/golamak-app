@@ -7,11 +7,12 @@ import AddonCard from "@/components/spesific/AddonCard";
 import { useCart } from "@/contexts/CartContext";
 import { useLiked } from "@/contexts/LikedContext";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 
 const DetailPage = () => {
+  const router = useRouter();
   const { addToCart } = useCart();
   const { id } = useLocalSearchParams();
   const menu = menus.find((item) => item.id === parseInt(id as string));
@@ -46,15 +47,26 @@ const DetailPage = () => {
     addToCart({
       id: menu.id,
       name: menu.name,
-      price: menu.price,
       image: menu.image,
-      quantity: qty,
+      quantity: 1,
       addons: selectedAddonObjects,
+      basePrice: menu.price,
+      price: menu.price, // optional, untuk jaga kompatibilitas lama
+      uniqueKey: `${menu.id}-${Date.now()}`,
     });
+
+    ToastAndroid.show(`${menu.name} added to cart`, 1.5);
+
+    // redirect ke home page setelah delay
+    setTimeout(() => {
+      router.push("/(tabs)"); // arahkan ke halaman home
+    }, 100);
   };
 
   const { toggleLike, isLiked } = useLiked();
   const liked = isLiked(menu?.id || 0);
+
+  const relatedAddons = ADDONS.filter((addon) => addon.categories.includes(menu?.category));
 
   return (
     <View className="relative flex-1">
@@ -87,9 +99,11 @@ const DetailPage = () => {
           </View>
 
           <View className="flex-row flex-wrap gap-4">
-            {ADDONS.map((item) => (
-              <AddonCard key={item.id} icon={item.image} label={item.name} selected={selectedAddons.includes(item.id)} onPress={() => handleSelectAddon(item.id)} />
-            ))}
+            {relatedAddons.length > 0 ? (
+              relatedAddons.map((item) => <AddonCard key={item.id} icon={item.image} label={item.name} selected={selectedAddons.includes(item.id)} onPress={() => handleSelectAddon(item.id)} />)
+            ) : (
+              <Text className="text-gray-400 font-poppins">No addons available for this category</Text>
+            )}
           </View>
         </View>
       </View>

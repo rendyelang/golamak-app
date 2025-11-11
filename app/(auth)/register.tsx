@@ -8,6 +8,7 @@ import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
 
 const register = () => {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,6 +25,7 @@ const register = () => {
         </View>
       </View>
       <View className="w-full bg-white/20 border border-tertier rounded-2xl px-6 py-9">
+        <TextInputField icon="person" placeholder="Name" value={name} onChangeText={setName} />
         <TextInputField icon="person" placeholder="Username" value={username} onChangeText={setUsername} />
 
         <TextInputField icon="lock" placeholder="Password" value={password} onChangeText={setPassword} isPassword />

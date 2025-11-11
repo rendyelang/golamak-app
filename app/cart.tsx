@@ -1,12 +1,16 @@
 import BackButton from "@/components/BackButton";
 import { useCart } from "@/contexts/CartContext";
+import { useOrders } from "@/contexts/OrderContext";
 import Feather from "@expo/vector-icons/Feather";
+import { useRouter } from "expo-router";
 import React from "react";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 // import { Picker } from "@react-native-picker/picker";
 
 export default function CartScreen() {
-  const { cart, toggleSelectItem, updateQuantity, removeSelectedItems, selectAll, isAllSelected, getTotalPrice } = useCart();
+  const { cart, toggleSelectItem, updateQuantity, removeSelectedItems, selectAll, isAllSelected, getTotalPrice, checkoutSelectedItems } = useCart();
+  const { addOrders } = useOrders();
+  const router = useRouter();
 
   const renderItem = ({ item }: any) => (
     <View
@@ -21,7 +25,7 @@ export default function CartScreen() {
       }}
     >
       {/* Checkbox */}
-      <TouchableOpacity onPress={() => toggleSelectItem(item.id)} className={`mr-4 flex justify-center items-center w-7 h-7 rounded-md border border-secondary ${item.selected ? "bg-secondary" : ""}`}>
+      <TouchableOpacity onPress={() => toggleSelectItem(item.uniqueKey)} className={`mr-4 flex justify-center items-center w-7 h-7 rounded-md border border-secondary ${item.selected ? "bg-secondary" : ""}`}>
         {item.selected && <Feather name="check" size={24} color="white" />}
       </TouchableOpacity>
 
@@ -36,7 +40,7 @@ export default function CartScreen() {
             marginRight: 14,
           }}
         />
-        <Text className="font-poppins-bold text-lg mt-4">Rp. {(item.price * item.quantity).toLocaleString("id-ID")}</Text>
+        <Text className="font-poppins-bold text-lg mt-4">Rp. {(item.totalPrice * item.quantity).toLocaleString("id-ID")}</Text>
       </View>
 
       {/* Info produk */}
@@ -68,7 +72,7 @@ export default function CartScreen() {
           >
             <View className="flex-row items-center border border-tertier rounded-xl p-1">
               <TouchableOpacity
-                onPress={() => updateQuantity(item.id, item.quantity - 1)}
+                onPress={() => updateQuantity(item.uniqueKey, item.quantity - 1)}
                 className={`w-9 h-9 rounded-full items-center justify-center ${item.quantity === 1 ? "bg-[#D9D9D9]" : "border border-secondary"}`}
                 disabled={item.quantity === 1}
               >
@@ -85,7 +89,7 @@ export default function CartScreen() {
                 {item.quantity}
               </Text>
 
-              <TouchableOpacity onPress={() => updateQuantity(item.id, item.quantity + 1)} className="w-9 h-9 rounded-full items-center justify-center bg-secondary">
+              <TouchableOpacity onPress={() => updateQuantity(item.uniqueKey, item.quantity + 1)} className="w-9 h-9 rounded-full items-center justify-center bg-secondary">
                 <Text style={{ fontSize: 18, color: "white" }}>＋</Text>
               </TouchableOpacity>
             </View>
@@ -94,6 +98,25 @@ export default function CartScreen() {
       </View>
     </View>
   );
+
+  const handleCheckout = () => {
+    const selectedItems = cart.filter((item) => item.selected);
+    if (selectedItems.length === 0) return ToastAndroid.show("Select an item first!", 1);
+
+    // ambil item yang dipilih dan hapus dari cart
+    const checkedOutItems = checkoutSelectedItems();
+    addOrders(checkedOutItems);
+
+    ToastAndroid.show(`Melanjutkan ke halaman Orders...`, 1.5);
+
+    // navigasi ke halaman orders sambil kirim data
+    setTimeout(() => {
+      router.push({
+        pathname: "/orders",
+        params: { data: JSON.stringify(checkedOutItems) },
+      });
+    }, 500);
+  };
 
   return (
     <View className="flex-1 pt-10 pb-4">
@@ -121,7 +144,7 @@ export default function CartScreen() {
       </View>
 
       {/* Daftar item */}
-      <FlatList data={cart} renderItem={renderItem} keyExtractor={(item) => item.id.toString()} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10, paddingHorizontal: 20 }} />
+      <FlatList data={cart} renderItem={renderItem} keyExtractor={(item) => item.uniqueKey.toString()} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 10, paddingHorizontal: 20 }} />
 
       {/* Footer */}
       <View className="flex-row justify-between items-center border-t border-gray-300 p-5">
@@ -135,7 +158,7 @@ export default function CartScreen() {
             <Text style={{ fontWeight: "bold", fontSize: 16 }}>Rp. {getTotalPrice().toLocaleString("id-ID")}</Text>
           </View>
 
-          <TouchableOpacity className="bg-secondary rounded-lg px-5 py-3">
+          <TouchableOpacity onPress={handleCheckout} className="bg-secondary rounded-lg px-5 py-3">
             <Text className="text-white font-poppins-medium">Checkout</Text>
           </TouchableOpacity>
         </View>
