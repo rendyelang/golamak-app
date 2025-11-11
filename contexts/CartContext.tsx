@@ -4,7 +4,7 @@ export interface CartItem {
   id: number;
   name: string;
   price: number;
-  image: any;
+  image_url: any;
   quantity: number;
   selected?: boolean;
   addons?: { id: number; name: string; price: number }[];

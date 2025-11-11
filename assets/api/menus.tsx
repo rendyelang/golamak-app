@@ -9,12 +9,12 @@ export type Menu = {
 };
 
 // Ganti sesuai URL ngrok kamu
-const BASE_URL = "https://c9f8000c6577.ngrok-free.app";
+const BASE_URL = "https://4c20773c5b9c.ngrok-free.app";
 
 export async function getMenus(): Promise<Menu[]> {
   const res = await fetch(`${BASE_URL}/api/menus/`, {
     headers: {
-      "ngrok-skip-browser-warning": "true", // ✅ ini penting
+      "ngrok-skip-browser-warning": "true",
     },
   });
 

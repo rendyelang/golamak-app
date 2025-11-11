@@ -23,7 +23,7 @@ const MenuCard: React.FC<Props> = ({ item }) => {
 
   return (
     <TouchableOpacity onPress={() => router.push({ pathname: "/detail/[id]", params: { id: item.id } })} className="border border-tertier rounded-lg overflow-hidden w-[48%]">
-      <Image className="w-48 h-28" source={item.image} resizeMode="cover" />
+      <Image className="w-48 h-28" source={{ uri: item.image_url }} resizeMode="cover" />
       <View className="px-3 flex-col py-3">
         <Text className="font-poppins-semibold text-lg">{item.name}</Text>
         <Text className="font-poppins text-gray-500 mb-4">
@@ -32,9 +32,6 @@ const MenuCard: React.FC<Props> = ({ item }) => {
         </Text>
         <View className="flex-row justify-between items-center">
           <Text className="font-poppins-semibold text-lg">Rp. {item.price}</Text>
-          {/* <AddToCartBtn onPress={() => addToCart(item)} /> */}
-          {/* <LikeButton /> */}
-
           <TouchableOpacity onPress={handleLike} className="bg-white/60 p-2 rounded-full border border-tertier">
             <Ionicons name={liked ? "heart" : "heart-outline"} size={24} color="red" />
           </TouchableOpacity>

@@ -1,114 +1,125 @@
+import { getMenus, Menu } from "@/assets/api/menus"; // ✅ ambil dari API
 import ADDONS from "@/assets/data/addons";
-import menus from "@/assets/data/menus";
 import BackButton from "@/components/BackButton";
-// import LikeButton from "@/components/LikeButton";
 import { Button } from "@/components/signInUpButton";
 import AddonCard from "@/components/spesific/AddonCard";
 import { useCart } from "@/contexts/CartContext";
 import { useLiked } from "@/contexts/LikedContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Image, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Image, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 
 const DetailPage = () => {
   const router = useRouter();
   const { addToCart } = useCart();
   const { id } = useLocalSearchParams();
-  const menu = menus.find((item) => item.id === parseInt(id as string));
+  const { toggleLike, isLiked } = useLiked();
 
-  // sekarang menyimpan beberapa addon yang dipilih
+  const [menu, setMenu] = useState<Menu | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedAddons, setSelectedAddons] = useState<number[]>([]);
   const [qty, setQty] = useState(1);
 
-  const handleSelectAddon = (addonId: number) => {
-    setSelectedAddons(
-      (prev) =>
-        prev.includes(addonId)
-          ? prev.filter((id) => id !== addonId) // kalau sudah ada → hapus (deselect)
-          : [...prev, addonId] // kalau belum ada → tambah
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const menus = await getMenus(); // ✅ panggil API
+        const found = menus.find((item) => item.id === parseInt(id as string));
+        setMenu(found || null);
+      } catch (error) {
+        console.error("Failed to load menu:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenu();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+        <Text>Loading menu...</Text>
+      </View>
     );
+  }
+
+  if (!menu) {
+    return (
+      <View style={styles.center}>
+        <Text>Menu not found.</Text>
+      </View>
+    );
+  }
+
+  const handleSelectAddon = (addonId: number) => {
+    setSelectedAddons((prev) => (prev.includes(addonId) ? prev.filter((id) => id !== addonId) : [...prev, addonId]));
   };
 
-  // total harga semua addon yang dipilih
   const totalAddonPrice = selectedAddons.reduce((acc, addonId) => {
     const addon = ADDONS.find((a) => a.id === addonId);
     return acc + (addon?.price || 0);
   }, 0);
 
-  // Total harga keseluruhan = (harga menu + addon) * qty
   const totalPrice = (menu?.price || 0) * qty + totalAddonPrice;
 
   const handleAddToCart = () => {
-    if (!menu) return;
-
-    const selectedAddonObjects = ADDONS.filter((a) => selectedAddons.includes(a.id));
-
     addToCart({
       id: menu.id,
       name: menu.name,
-      image: menu.image,
-      quantity: 1,
-      addons: selectedAddonObjects,
+      image: { uri: menu.image_url }, // ✅ ubah ke { uri: ... } untuk <Image />
+      quantity: qty,
+      addons: ADDONS.filter((a) => selectedAddons.includes(a.id)),
       basePrice: menu.price,
-      price: menu.price, // optional, untuk jaga kompatibilitas lama
+      price: totalPrice,
       uniqueKey: `${menu.id}-${Date.now()}`,
     });
 
-    ToastAndroid.show(`${menu.name} added to cart`, 1.5);
-
-    // redirect ke home page setelah delay
-    setTimeout(() => {
-      router.push("/(tabs)"); // arahkan ke halaman home
-    }, 100);
+    ToastAndroid.show(`${menu.name} added to cart`, 1);
+    setTimeout(() => router.push("/(tabs)"), 100);
   };
 
-  const { toggleLike, isLiked } = useLiked();
-  const liked = isLiked(menu?.id || 0);
-
-  const relatedAddons = ADDONS.filter((addon) => addon.categories.includes(menu?.category));
+  const liked = isLiked(menu.id);
+  const relatedAddons = ADDONS.filter((addon) => addon.categories.includes(menu.category));
 
   return (
     <View className="relative flex-1">
-      {/* Image Area */}
+      {/* Gambar */}
       <View className="relative">
-        <Image className="w-full h-96" source={menu?.image} />
+        <Image className="w-full h-96" source={{ uri: menu.image_url }} /> {/* ✅ */}
         <View className="absolute top-12 left-5">
           <BackButton />
         </View>
         <View className="absolute top-12 right-5">
-          <TouchableOpacity onPress={() => menu && toggleLike(menu)} className="bg-white/60 p-2 rounded-full border border-tertier">
+          <TouchableOpacity onPress={() => toggleLike(menu)} className="bg-white/60 p-2 rounded-full border border-tertier">
             <Ionicons name={liked ? "heart" : "heart-outline"} size={24} color="red" />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Main Area */}
+      {/* Info Menu */}
       <View className="px-5 pt-10">
-        {/* Menu Info */}
-        <View>
-          <Text className="font-poppins-medium text-3xl mb-5">{menu?.name}</Text>
-          <Text className="font-poppins">{menu?.description}</Text>
+        <Text className="font-poppins-medium text-3xl mb-5">{menu.name}</Text>
+        <Text className="font-poppins">{menu.description}</Text>
+
+        {/* Addons */}
+        <View className="flex-row items-center my-5 gap-x-3">
+          <Text className="font-poppins-medium text-xl">Addons</Text>
+          <Text className="font-poppins-semibold text-tertier text-lg">+ Rp. {totalAddonPrice.toLocaleString("id-ID")}</Text>
         </View>
 
-        {/* Addons Section */}
-        <View>
-          <View className="flex-row items-center my-5 gap-x-3">
-            <Text className="font-poppins-medium text-xl">Addons</Text>
-            <Text className="font-poppins-semibold text-tertier text-lg">{totalAddonPrice > 0 ? `+ Rp. ${totalAddonPrice.toLocaleString("id-ID")}` : "+ Rp. 0"}</Text>
-          </View>
-
-          <View className="flex-row flex-wrap gap-4">
-            {relatedAddons.length > 0 ? (
-              relatedAddons.map((item) => <AddonCard key={item.id} icon={item.image} label={item.name} selected={selectedAddons.includes(item.id)} onPress={() => handleSelectAddon(item.id)} />)
-            ) : (
-              <Text className="text-gray-400 font-poppins">No addons available for this category</Text>
-            )}
-          </View>
+        <View className="flex-row flex-wrap gap-4">
+          {relatedAddons.length > 0 ? (
+            relatedAddons.map((item) => <AddonCard key={item.id} icon={item.image} label={item.name} selected={selectedAddons.includes(item.id)} onPress={() => handleSelectAddon(item.id)} />)
+          ) : (
+            <Text className="text-gray-400 font-poppins">No addons available for this category</Text>
+          )}
         </View>
       </View>
 
-      {/* Bottom Area */}
+      {/* Bottom Section */}
       <View style={styles.bottomContainer}>
         <View className="flex-row justify-between items-center mb-5">
           <View className="flex-row items-center gap-x-4">
@@ -134,6 +145,7 @@ const DetailPage = () => {
 };
 
 const styles = StyleSheet.create({
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
   bottomContainer: {
     position: "absolute",
     bottom: 0,
@@ -143,9 +155,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    overflow: "hidden",
-    // efek visual tambahan
-    backgroundColor: "#fff", // semi transparan
+    backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#ED9636",
     shadowColor: "#000",
