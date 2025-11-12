@@ -2,13 +2,14 @@ import { getMenus, Menu } from "@/assets/api/menus"; // ✅ ambil dari API
 import ADDONS from "@/assets/data/addons";
 import BackButton from "@/components/BackButton";
 import { Button } from "@/components/signInUpButton";
+import SkeletonDetail from "@/components/skeleton/DetailPageSkeleton";
 import AddonCard from "@/components/spesific/AddonCard";
 import { useCart } from "@/contexts/CartContext";
 import { useLiked } from "@/contexts/LikedContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Image, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 
 const DetailPage = () => {
   const router = useRouter();
@@ -38,12 +39,7 @@ const DetailPage = () => {
   }, [id]);
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-        <Text>Loading menu...</Text>
-      </View>
-    );
+    return <SkeletonDetail />;
   }
 
   if (!menu) {

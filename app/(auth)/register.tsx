@@ -1,10 +1,11 @@
+import { registerAdmin } from "@/assets/api/auth";
 import GoogleLogo from "@/assets/images/icons/google_logo.svg";
 import bgImg from "@/assets/images/rumah_minang.png";
 import { Button } from "@/components/signInUpButton";
 import { TextInputField } from "@/components/text-input-field";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ImageBackground, Text, TouchableOpacity, View } from "react-native";
 
 const register = () => {
   const router = useRouter();
@@ -12,6 +13,31 @@ const register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // ✅ Function handleRegister
+  const handleRegister = async () => {
+    if (!name || !username || !password || !confirmPassword) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await registerAdmin(name, username, password);
+      Alert.alert("Success", `Welcome, ${res.account.name}!`);
+      router.push("/(auth)/login");
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ImageBackground source={bgImg} resizeMode="cover" className="flex-1 pt-20 pb-36 px-5 justify-between items-center">
@@ -43,13 +69,7 @@ const register = () => {
           </TouchableOpacity>
         </View>
 
-        <Button
-          title="Sign Up"
-          variant="primary"
-          onPress={() => {
-            router.push("/(auth)/login");
-          }}
-        />
+        <Button title={loading ? "Registering..." : "Sign Up"} variant="primary" onPress={handleRegister} disabled={loading} />
 
         {/* Or separator */}
         <View className="flex-row items-center my-6">

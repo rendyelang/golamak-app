@@ -52,7 +52,6 @@ export default function RootLayout() {
               <Stack.Screen name="(auth)/splash" />
               <Stack.Screen name="(auth)/welcome" />
               <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="modal" options={{ presentation: "modal" }} />
             </Stack>
             <StatusBar style="auto" />
           </ThemeProvider>

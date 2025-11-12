@@ -1,10 +1,20 @@
 import avatar from "@/assets/images/avatar.png";
 import handleMaintenance from "@/scripts/handleMaintenance";
-import React from "react";
+import { getAuthData } from "@/utils/authStorage";
+import React, { useEffect, useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import EditButton from "../EditButton";
 
 const ProfileCard = () => {
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const { user } = await getAuthData();
+      if (user) setName(user.name);
+    })();
+  }, []);
+
   try {
     return (
       <View
@@ -23,7 +33,7 @@ const ProfileCard = () => {
             <View className="mb-2">
               <Image className="rounded-full" source={avatar} />
             </View>
-            <Text className="font-poppins-semibold text-xl">Elang</Text>
+            <Text className="font-poppins-semibold text-xl">{name || "Loading.."}</Text>
             <View className="flex-row gap-x-1">
               <TouchableOpacity onPress={handleMaintenance}>
                 <Text className="underline text-gray-400">75 Points</Text>

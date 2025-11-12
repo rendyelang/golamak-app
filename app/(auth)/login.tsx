@@ -1,16 +1,44 @@
+import { loginAdmin } from "@/assets/api/auth";
 import GoogleLogo from "@/assets/images/icons/google_logo.svg";
 import bgImg from "@/assets/images/rumah_minang.png";
 import { Button } from "@/components/signInUpButton";
 import { TextInputField } from "@/components/text-input-field";
+import { saveAuthData } from "@/utils/authStorage";
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ImageBackground, Text, TouchableOpacity, View } from "react-native";
 
 const login = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // 🟩 Fungsi handleLogin
+  const handleLogin = async () => {
+    if (!username || !password) {
+      Alert.alert("Warning", "Username and password must be filled");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await loginAdmin(username, password);
+      console.log("Login success:", res);
+
+      // Simpan token jika perlu (contohnya nanti bisa ke AsyncStorage)
+      // await AsyncStorage.setItem("accessToken", res.accessToken);
+      await saveAuthData(res.accessToken, res.refreshToken, res.admin);
+
+      Alert.alert("Success", res.message);
+      router.push("/(tabs)");
+    } catch (err: any) {
+      Alert.alert("Login Failed", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ImageBackground source={bgImg} resizeMode="cover" className="flex-1 pt-20 pb-36 px-5 justify-between items-center">
@@ -27,19 +55,13 @@ const login = () => {
         <BlurView tint="light" intensity={40} className="inset-0 border border-tertier rounded-2xl px-6 py-9">
           <TextInputField icon="person" placeholder="Username" value={username} onChangeText={setUsername} />
 
-          <TextInputField icon="lock" placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
+          <TextInputField icon="lock" placeholder="Password" value={password} onChangeText={setPassword} isPassword />
 
           <TouchableOpacity onPress={() => {}} className="self-end mb-4">
             <Text className="text-white font-poppins-medium text-sm underline">Forgot Password?</Text>
           </TouchableOpacity>
 
-          <Button
-            title="Login"
-            variant="primary"
-            onPress={() => {
-              router.push("/(tabs)");
-            }}
-          />
+          <Button title={loading ? "Loading..." : "Login"} variant="primary" onPress={handleLogin} disabled={loading} />
 
           <View className="flex-row items-center justify-center mt-4">
             <Text className="text-white font-poppins text-sm">Don't have an account? </Text>
