@@ -2,6 +2,7 @@ import ProfileCard from "@/components/spesific/ProfileCard";
 import ProfileMenuItem from "@/components/spesific/ProfileMenuItem";
 import { useLiked } from "@/contexts/LikedContext";
 import handleMaintenance from "@/scripts/handleMaintenance";
+import { clearAuthData } from "@/utils/authStorage";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Text, View } from "react-native";
@@ -19,7 +20,14 @@ const profile = () => {
         <ProfileMenuItem onPress={() => router.push("/liked")} icon="favorite" label="Favorites" badgeCount={likedCount} />
         <ProfileMenuItem onPress={handleMaintenance} icon="settings" label="Setting" />
         <ProfileMenuItem onPress={() => router.push("/helpCenter")} icon="help-outline" label="Help Center" />
-        <ProfileMenuItem icon="logout" label="Log Out" />
+        <ProfileMenuItem
+          onPress={async () => {
+            await clearAuthData();
+            router.replace("/login");
+          }}
+          icon="logout"
+          label="Log Out"
+        />
       </View>
     </View>
   );

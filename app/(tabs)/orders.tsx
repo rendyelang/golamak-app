@@ -1,8 +1,10 @@
+import { createSnapTransaction } from "@/assets/api/payment";
 import OrderStatusButton from "@/components/spesific/OrderStatusButton";
 import { useOrders } from "@/contexts/OrderContext";
 import Feather from "@expo/vector-icons/Feather";
+import * as Linking from "expo-linking";
 import React, { useMemo, useState } from "react";
-import { FlatList, Image, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
+import { Alert, FlatList, Image, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 
 export default function OrdersScreen() {
   const { orders, toggleSelectItem, selectAll, isAllSelected, getSelectedOrders, updateStatus } = useOrders();
@@ -10,6 +12,7 @@ export default function OrdersScreen() {
   const [activeLabel, setActiveLabel] = useState<"Unpaid" | "Process" | "Ready" | "Done">("Unpaid");
 
   const statuses: (typeof activeLabel)[] = ["Unpaid", "Process", "Ready", "Done"];
+  const [loading, setLoading] = useState(false);
 
   // Filter order berdasarkan status tab
   const filteredOrders = orders.filter((o) => o.status === activeLabel);
@@ -20,11 +23,44 @@ export default function OrdersScreen() {
   }, [filteredOrders]);
 
   // Handle tombol Pay
-  const handlePay = () => {
+  const handlePay = async () => {
+    setLoading(true);
     const selected = getSelectedOrders(activeLabel);
-    if (selected.length === 0) return ToastAndroid.show("Select an order first!", 1);
-    selected.forEach((o) => updateStatus(o.uniqueKey, "Process"));
-    ToastAndroid.show("Payment successful, moved to Process tab!", 1.5);
+    if (selected.length === 0) {
+      ToastAndroid.show("Select an order first!", ToastAndroid.SHORT);
+      setLoading(false);
+      return;
+    }
+
+    const totalAmount = selected.reduce((sum, o) => sum + o.totalPrice * o.quantity, 0);
+    const orderId = `ORDER-${Date.now()}`; // bikin ID unik
+    const customer = {
+      first_name: "anon",
+      last_name: "anon",
+    };
+
+    try {
+      console.log("Creating Midtrans Snap transaction...");
+      const res = await createSnapTransaction(orderId, totalAmount, customer);
+      console.log("Snap transaction response:", res);
+
+      if (res.redirect_url) {
+        // 🔗 Buka sandbox Snap bawaan Midtrans
+        Linking.openURL(res.redirect_url);
+
+        Alert.alert("Redirecting to Midtrans...", "You will be redirected to the payment page.");
+        selected.forEach((o) => updateStatus(o.uniqueKey, "Process"));
+        ToastAndroid.show("Payment in progress...", ToastAndroid.SHORT);
+      } else {
+        Alert.alert("Error", "Failed to get redirect URL from server.");
+      }
+    } catch (error: any) {
+      console.error("Payment error:", error.response?.data || error.message);
+      Alert.alert("Payment Failed", error.response?.data?.message || "Something went wrong. Please try again.");
+      ToastAndroid.show("Payment failed!", ToastAndroid.SHORT);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Render tiap item order
@@ -104,8 +140,8 @@ export default function OrdersScreen() {
           {/* Total + Pay */}
           <View className="flex-row items-center gap-x-3">
             <Text className="font-poppins-semibold text-lg">Rp. {selectedTotal.toLocaleString("id-ID")}</Text>
-            <TouchableOpacity onPress={handlePay} disabled={selectedTotal === 0} className={`rounded-lg px-5 py-3 ${selectedTotal === 0 ? "bg-gray-400" : "bg-secondary"}`}>
-              <Text className="text-white font-poppins-medium">Pay</Text>
+            <TouchableOpacity onPress={handlePay} disabled={selectedTotal === 0 || loading} className={`rounded-lg px-5 py-3 ${selectedTotal === 0 ? "bg-gray-400" : "bg-secondary"}`}>
+              <Text className="text-white font-poppins-medium">{loading ? "Loading.." : "Pay"}</Text>
             </TouchableOpacity>
           </View>
         </View>

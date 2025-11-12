@@ -36,9 +36,9 @@ const ProfileCard = () => {
             <Text className="font-poppins-semibold text-xl">{name || "Loading.."}</Text>
             <View className="flex-row gap-x-1">
               <TouchableOpacity onPress={handleMaintenance}>
-                <Text className="underline text-gray-400">75 Points</Text>
+                <Text className="underline text-gray-400">0 Points</Text>
               </TouchableOpacity>
-              <Text className="text-gray-400">| Level 9</Text>
+              <Text className="text-gray-400">| Level 1</Text>
             </View>
           </View>
         </View>

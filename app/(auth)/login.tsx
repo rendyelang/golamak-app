@@ -1,8 +1,9 @@
 import { loginAdmin } from "@/assets/api/auth";
-import GoogleLogo from "@/assets/images/icons/google_logo.svg";
 import bgImg from "@/assets/images/rumah_minang.png";
+import GoogleAuthBtn from "@/components/googleAuthBtn";
 import { Button } from "@/components/signInUpButton";
 import { TextInputField } from "@/components/text-input-field";
+import handleMaintenance from "@/scripts/handleMaintenance";
 import { saveAuthData } from "@/utils/authStorage";
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
@@ -57,7 +58,7 @@ const login = () => {
 
           <TextInputField icon="lock" placeholder="Password" value={password} onChangeText={setPassword} isPassword />
 
-          <TouchableOpacity onPress={() => {}} className="self-end mb-4">
+          <TouchableOpacity onPress={handleMaintenance} className="self-end mb-4">
             <Text className="text-white font-poppins-medium text-sm underline">Forgot Password?</Text>
           </TouchableOpacity>
 
@@ -77,15 +78,7 @@ const login = () => {
             <View className="flex-1 h-px bg-white" />
           </View>
 
-          {/* Google login button */}
-          <TouchableOpacity
-            className="p-2 bg-white rounded-lg border border-tertier self-center items-center justify-center shadow-sm"
-            onPress={() => {
-              // Handle Google login
-            }}
-          >
-            <GoogleLogo />
-          </TouchableOpacity>
+          <GoogleAuthBtn onPress={handleMaintenance} />
         </BlurView>
       </View>
     </ImageBackground>

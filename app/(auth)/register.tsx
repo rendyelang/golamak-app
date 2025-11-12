@@ -1,8 +1,9 @@
 import { registerAdmin } from "@/assets/api/auth";
-import GoogleLogo from "@/assets/images/icons/google_logo.svg";
 import bgImg from "@/assets/images/rumah_minang.png";
+import GoogleAuthBtn from "@/components/googleAuthBtn";
 import { Button } from "@/components/signInUpButton";
 import { TextInputField } from "@/components/text-input-field";
+import handleMaintenance from "@/scripts/handleMaintenance";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, ImageBackground, Text, TouchableOpacity, View } from "react-native";
@@ -79,14 +80,7 @@ const register = () => {
         </View>
 
         {/* Google login button */}
-        <TouchableOpacity
-          className="p-2 bg-white rounded-lg border border-tertier self-center items-center justify-center shadow-sm"
-          onPress={() => {
-            // Handle Google login
-          }}
-        >
-          <GoogleLogo />
-        </TouchableOpacity>
+        <GoogleAuthBtn onPress={handleMaintenance} />
       </View>
     </ImageBackground>
   );
