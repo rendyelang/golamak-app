@@ -1,6 +1,5 @@
+import { getApiBaseUrl } from "@/scripts/config";
 import axios from "axios";
-
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export interface RegisterResponse {
   message: string;
@@ -29,23 +28,13 @@ const config = {
   },
 };
 
-// Register logic
 export const registerAdmin = async (name: string, username: string, password: string): Promise<RegisterResponse> => {
+  const baseUrl = await getApiBaseUrl();
   try {
-    console.log(API_BASE_URL);
-    const response = await axios.post(
-      `${API_BASE_URL}/api/admin/add-admin`,
-      {
-        name,
-        username,
-        password,
-      },
-      config
-    );
-
+    const response = await axios.post(`${baseUrl}/api/admin/add-admin`, { name, username, password }, config);
     return response.data as RegisterResponse;
   } catch (error: any) {
-    console.log("Register error:", error.response?.data || error.message); // 🟩 log detail error
+    console.log("Register error:", error.response?.data || error.message);
     if (error.response) {
       throw new Error(error.response.data.message || "Failed to register");
     } else {
@@ -54,18 +43,10 @@ export const registerAdmin = async (name: string, username: string, password: st
   }
 };
 
-// logic logic
 export const loginAdmin = async (username: string, password: string): Promise<LoginResponse> => {
+  const baseUrl = await getApiBaseUrl();
   try {
-    const response = await axios.post(
-      `${API_BASE_URL}/api/admin/login`,
-      {
-        username,
-        password,
-      },
-      config
-    );
-
+    const response = await axios.post(`${baseUrl}/api/admin/login`, { username, password }, config);
     return response.data as LoginResponse;
   } catch (error: any) {
     if (error.response) {
