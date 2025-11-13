@@ -1,12 +1,12 @@
 import { registerAdmin } from "@/assets/api/auth";
 import bgImg from "@/assets/images/rumah_minang.png";
-import GoogleAuthBtn from "@/components/googleAuthBtn";
 import { Button } from "@/components/signInUpButton";
 import { TextInputField } from "@/components/text-input-field";
 import handleMaintenance from "@/scripts/handleMaintenance";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, ImageBackground, Text, TouchableOpacity, View } from "react-native";
+import GoogleAuthBtn from "../../components/GoogleAuthBtn";
 
 const register = () => {
   const router = useRouter();
